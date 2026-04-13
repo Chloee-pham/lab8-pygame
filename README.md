@@ -35,6 +35,20 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Code Explorer
+
+Launch the lightweight browser-based code explorer for this project:
+
+```bash
+python code-explorer/serve.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
 ## Notes
 
 - On macOS/Linux, activate with:

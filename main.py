@@ -1,4 +1,4 @@
-"""Skeleton pygame app: 10 squares moving randomly.
+"""Skeleton pygame app: moving squares with size-based speed.
 
 This file intentionally contains stubs and TODO prompts.
 Fill in each TODO step-by-step.
@@ -18,10 +18,13 @@ WINDOW_HEIGHT = 600
 MIN_SQUARE_SIZE = 15
 MAX_SQUARE_SIZE = 60
 BASE_SQUARE_SIZE = 30
-SQUARE_COUNT = 10
+SQUARE_COUNT = 24
 BACKGROUND_COLOR = (20, 20, 20)
 FPS = 60
 IDLE_WAIT_MS = 1
+JITTER_ACCELERATION = 220.0
+BASE_MAX_JITTER_SPEED = 180.0
+BOUNCE_DAMPING = 0.82
 
 
 @dataclass
@@ -91,21 +94,33 @@ def handle_events() -> bool:
 
 def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
 	"""Update all squares for one frame."""
-	# TODO (Socratic): Extract respawn logic to a helper function to reduce duplication.
-	# TODO (Socratic): Add alternative edge behaviors (bounce/wrap) and switch by config.
+	# Add small random acceleration each frame to create a "shaky" movement.
 	for square in squares:
+		speed_scale = BASE_SQUARE_SIZE / square.size
+		max_speed = BASE_MAX_JITTER_SPEED * speed_scale
+
+		square.vx += random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION) * dt_seconds
+		square.vy += random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION) * dt_seconds
+
+		square.vx = max(-max_speed, min(max_speed, square.vx))
+		square.vy = max(-max_speed, min(max_speed, square.vy))
+
 		square.x += square.vx * dt_seconds
 		square.y += square.vy * dt_seconds
 
-		if square.x > WINDOW_WIDTH:
-			square.x = -square.size
-		elif square.x + square.size < 0:
-			square.x = WINDOW_WIDTH
+		if square.x < 0:
+			square.x = 0
+			square.vx = abs(square.vx) * BOUNCE_DAMPING
+		elif square.x + square.size > WINDOW_WIDTH:
+			square.x = WINDOW_WIDTH - square.size
+			square.vx = -abs(square.vx) * BOUNCE_DAMPING
 
-		if square.y > WINDOW_HEIGHT:
-			square.y = -square.size
-		elif square.y + square.size < 0:
-			square.y = WINDOW_HEIGHT
+		if square.y < 0:
+			square.y = 0
+			square.vy = abs(square.vy) * BOUNCE_DAMPING
+		elif square.y + square.size > WINDOW_HEIGHT:
+			square.y = WINDOW_HEIGHT - square.size
+			square.vy = -abs(square.vy) * BOUNCE_DAMPING
 
 
 def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:

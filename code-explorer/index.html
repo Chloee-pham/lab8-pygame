@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lab 8 Code Explorer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="backdrop backdrop-a"></div>
+    <div class="backdrop backdrop-b"></div>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Project Explorer</p>
+          <h1>Lab 8 Pygame code explorer</h1>
+          <p class="lede">
+            Browse the current repo, inspect source files, and keep the whole
+            lab in one focused workspace.
+          </p>
+        </div>
+        <div class="hero-metrics" id="summaryCards"></div>
+      </header>
+
+      <section class="toolbar">
+        <label class="search-wrap">
+          <span>Search files</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="main.py, README, report..."
+          />
+        </label>
+        <div class="toolbar-chip" id="selectionLabel">No file selected</div>
+      </section>
+
+      <main class="workspace">
+        <aside class="sidebar">
+          <div class="panel-title">Repository tree</div>
+          <div id="fileTree" class="file-tree"></div>
+        </aside>
+        <section class="content">
+          <div class="content-header">
+            <div>
+              <div class="panel-title">Source preview</div>
+              <h2 id="fileTitle">Select a file</h2>
+            </div>
+            <div class="file-meta" id="fileMeta"></div>
+          </div>
+          <article id="fileViewer" class="viewer empty-state">
+            <p>Pick a file from the tree to inspect its contents.</p>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>
