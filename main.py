@@ -108,9 +108,7 @@ def create_initial_squares(count: int) -> List[MovingSquare]:
 
 
 def rebirth_square(square: MovingSquare) -> None:
-    """Reset a square to a brand-new random state (in-place)."""
-    size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
-    square.size = size
+    size = square.size  
     square.x = random.uniform(0, WINDOW_WIDTH - size)
     square.y = random.uniform(0, WINDOW_HEIGHT - size)
     square.vx, square.vy = _random_velocity(size)
