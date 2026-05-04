@@ -129,6 +129,12 @@ def _center(square: MovingSquare) -> tuple[float, float]:
     return square.x + square.size / 2, square.y + square.size / 2
 
 
+def check_collision(a: MovingSquare, b: MovingSquare) -> bool:
+    rect_a = pygame.Rect(a.x, a.y, a.size, a.size)
+    rect_b = pygame.Rect(b.x, b.y, b.size, b.size)
+    return rect_a.colliderect(rect_b)
+
+
 def _find_nearest_larger_target(
     chaser: MovingSquare,
     squares: List[MovingSquare],
@@ -251,3 +257,5 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
+
+
