@@ -18,3 +18,10 @@ Trail is drawn using pygame.draw.lines() each frame.
 Visual artifact: when a square respawns, the old trail positions remain,
 causing a line to be drawn from the old location to the new one.
 Fix: call square.trail.clear() inside rebirth_square() to reset the trail on respawn.
+Exercise 8:
+To validate speed, I create a square with known position and velocity,
+simulate one frame with a fixed dt=1.0s, and check the resulting position.
+Expected: x = x0 + vx * dt. Used assert to verify within floating point tolerance.
+TEST_MODE_ON flag controls whether the test runs at startup.
+Limitation: this only tests basic linear movement, not acceleration or wall wrapping.
+

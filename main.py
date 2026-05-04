@@ -11,6 +11,7 @@ import itertools
 
 
 
+TEST_MODE_ON: bool = True
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 MIN_SQUARE_SIZE = 15
@@ -270,10 +271,31 @@ def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
     pygame.display.flip()
 
 
+def run_speed_test() -> None:
+    square = MovingSquare(
+        x=100.0, y=100.0,
+        vx=50.0, vy=0.0,
+        size=25,
+        color=(255, 255, 255),
+        lifespan=10.0,
+        age=0.0,
+    )
+    dt = 1.0
+    expected_x = square.x + square.vx * dt  # = 150.0
+
+    square.x += square.vx * dt
+    square.y += square.vy * dt
+
+    assert abs(square.x - expected_x) < 0.001, f"Speed test failed: expected {expected_x}, got {square.x}"
+    print("Speed test passed.")
+
+
 def run() -> None:
     """Application entry point."""
     screen, clock = init_pygame()
     squares = create_initial_squares()
+    if TEST_MODE_ON:
+        run_speed_test()
 
     running = True
     while running:
