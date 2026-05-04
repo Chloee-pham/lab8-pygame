@@ -12,3 +12,9 @@ Exercise 6:
 Predator grows by 20% of prey size after eating (capped at MAX_SQUARE_SIZE).
 Since larger squares should move slower, velocity is clamped after each growth using the same speed_scale formula already used in update_squares().
 This keeps the physics consistent — bigger squares naturally become slower.
+Exercise 7:
+Each square stores its last 30 center positions in a deque (maxlen=30).
+Trail is drawn using pygame.draw.lines() each frame.
+Visual artifact: when a square respawns, the old trail positions remain,
+causing a line to be drawn from the old location to the new one.
+Fix: call square.trail.clear() inside rebirth_square() to reset the trail on respawn.

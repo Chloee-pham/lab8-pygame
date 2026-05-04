@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 import math
 import random
 from typing import List
+from collections import deque
 
 import pygame
 import itertools
@@ -18,6 +19,7 @@ BASE_SQUARE_SIZE = 30
 SQUARE_COUNT = 24
 BACKGROUND_COLOR = (20, 20, 20)
 FPS = 60
+TRAILS_LENGTH = 30
 IDLE_WAIT_MS = 1
 JITTER_ACCELERATION = 220.0
 BASE_MAX_JITTER_SPEED = 180.0
@@ -43,6 +45,8 @@ class MovingSquare:
     color: tuple[int, int, int]
     lifespan: float        # total time to live, in seconds
     age: float = field(default=0.0)   # time lived so far, in seconds
+    trail: deque = field(default_factory=lambda: deque(maxlen=TRAILS_LENGTH))
+
 
 
 def _random_velocity(size: int) -> tuple[float, float]:
@@ -79,9 +83,10 @@ def init_pygame() -> tuple[pygame.Surface, pygame.time.Clock]:
     return screen, clock
 
 
-def _make_square() -> MovingSquare:
+def _make_square(size: int | None = None) -> MovingSquare:
     """Create one square with random attributes."""
-    size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+    if size is None:
+        size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
     x = random.uniform(0, WINDOW_WIDTH - size)
     y = random.uniform(0, WINDOW_HEIGHT - size)
     vx, vy = _random_velocity(size)
@@ -97,7 +102,7 @@ def _make_square() -> MovingSquare:
     )
 
 
-def create_initial_squares(count: int) -> List[MovingSquare]:
+def create_initial_squares() -> List[MovingSquare]:
     squares = []
     for _ in range(5):
         squares.append(_make_square(size=25))
@@ -117,6 +122,8 @@ def rebirth_square(square: MovingSquare) -> None:
     square.color = _random_color()
     square.lifespan = random.uniform(MIN_LIFESPAN, MAX_LIFESPAN)
     square.age = 0.0
+    square.trail.clear()
+
 
 
 def handle_events() -> bool:
@@ -234,6 +241,8 @@ def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
              square.y = WINDOW_HEIGHT
         elif square.y > WINDOW_HEIGHT:
              square.y = -square.size
+        square.trail.append((int(square.x + square.size / 2), int(square.y + square.size / 2)))
+    
 
 
 
@@ -246,6 +255,9 @@ def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
     screen.fill(BACKGROUND_COLOR)
 
     for square in squares:
+        if len(square.trail) >= 2:
+            pygame.draw.lines(screen, square.color, False, list(square.trail), 1)
+
         # Compute fade: fully opaque when young, dimmer when old.
         ratio = min(square.age / square.lifespan, 1.0)
         alpha = int(255 - ratio * 175)   
