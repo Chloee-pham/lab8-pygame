@@ -25,6 +25,8 @@ IDLE_WAIT_MS = 1
 JITTER_ACCELERATION = 220.0
 BASE_MAX_JITTER_SPEED = 180.0
 BOUNCE_DAMPING = 0.82
+GROWTH_SPEED = 1        # pixels per growth tick
+GROWTH_INTERVAL_MS = 500  # ms between growth ticks
 MIN_LIFESPAN = 3.0   # seconds
 MAX_LIFESPAN = 10.0  # seconds
 
@@ -47,6 +49,8 @@ class MovingSquare:
     lifespan: float        # total time to live, in seconds
     age: float = field(default=0.0)   # time lived so far, in seconds
     trail: deque = field(default_factory=lambda: deque(maxlen=TRAILS_LENGTH))
+    pending_growth: int = field(default=0)
+    growth_timer: float = field(default=0.0)
 
 
 
@@ -150,18 +154,10 @@ def handle_eating(squares: List[MovingSquare]) -> None:
         if check_collision(a, b):
             if a.size > b.size:
                 rebirth_square(b)
-                a.size = min(a.size + b.size // 5, MAX_SQUARE_SIZE)
-                speed_scale = BASE_SQUARE_SIZE / a.size
-                max_speed = BASE_MAX_JITTER_SPEED * speed_scale
-                a.vx = max(-max_speed, min(max_speed, a.vx))
-                a.vy = max(-max_speed, min(max_speed, a.vy))
+                a.pending_growth += b.size // 5
             elif b.size > a.size:
                 rebirth_square(a)
-                b.size = min(b.size + a.size // 5, MAX_SQUARE_SIZE)
-                speed_scale = BASE_SQUARE_SIZE / b.size
-                max_speed = BASE_MAX_JITTER_SPEED * speed_scale
-                b.vx = max(-max_speed, min(max_speed, b.vx))
-                b.vy = max(-max_speed, min(max_speed, b.vy))
+                b.pending_growth += a.size // 5
 
 
 
@@ -243,6 +239,18 @@ def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
         elif square.y > WINDOW_HEIGHT:
              square.y = -square.size
         square.trail.append((int(square.x + square.size / 2), int(square.y + square.size / 2)))
+
+        # --- Animated growth ---
+        if square.pending_growth > 0:
+            square.growth_timer += dt_seconds
+            if square.growth_timer >= GROWTH_INTERVAL_MS / 1000.0:
+                square.growth_timer = 0.0
+                square.size = min(square.size + GROWTH_SPEED, MAX_SQUARE_SIZE)
+                square.pending_growth -= GROWTH_SPEED
+                speed_scale = BASE_SQUARE_SIZE / square.size
+                new_max = BASE_MAX_JITTER_SPEED * speed_scale
+                square.vx = max(-new_max, min(new_max, square.vx))
+                square.vy = max(-new_max, min(new_max, square.vy))
     
 
 

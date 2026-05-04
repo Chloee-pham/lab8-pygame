@@ -24,4 +24,10 @@ simulate one frame with a fixed dt=1.0s, and check the resulting position.
 Expected: x = x0 + vx * dt. Used assert to verify within floating point tolerance.
 TEST_MODE_ON flag controls whether the test runs at startup.
 Limitation: this only tests basic linear movement, not acceleration or wall wrapping.
+Exercies 9:
+Instead of growing instantly after eating, the predator accumulates pending_growth.
+Every 500ms (GROWTH_INTERVAL_MS), the square grows by GROWTH_SPEED (1 pixel) until
+pending_growth reaches 0. Velocity is clamped after each growth tick to keep
+speed consistent with the new size.
 
+I DONT HAVE ENOUGH TIME T-T
