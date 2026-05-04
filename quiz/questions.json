@@ -1,0 +1,393 @@
+{
+  "quizzes": [
+    {
+      "id": "pygame-basics",
+      "title": "Pygame Fundamentals",
+      "description": "Test your knowledge of Pygame core concepts and this project's simulation",
+      "difficulty": "beginner",
+      "timeLimit": 600,
+      "questions": [
+        {
+          "id": 1,
+          "question": "What is the target frame rate (FPS) for the Lab 8 Pygame simulation?",
+          "type": "multiple-choice",
+          "options": ["30 FPS", "60 FPS", "120 FPS", "144 FPS"],
+          "correct": 1,
+          "explanation": "The simulation runs at 60 FPS as specified in the WINDOW_WIDTH and FPS constants."
+        },
+        {
+          "id": 2,
+          "question": "Which class represents a square entity in the simulation?",
+          "type": "multiple-choice",
+          "options": ["Square", "Entity", "MovingSquare", "GameObject"],
+          "correct": 2,
+          "explanation": "MovingSquare is a dataclass that stores position, velocity, size, color, and lifecycle data."
+        },
+        {
+          "id": 3,
+          "question": "What function is responsible for rendering one frame in the Pygame simulation?",
+          "type": "multiple-choice",
+          "options": ["render()", "draw_scene()", "paint()", "display()"],
+          "correct": 1,
+          "explanation": "The draw_scene() function clears the background, draws squares, and flips the display buffer."
+        },
+        {
+          "id": 4,
+          "question": "What is the main entry point for running the Pygame simulation?",
+          "type": "multiple-choice",
+          "options": ["start()", "main()", "run()", "play()"],
+          "correct": 2,
+          "explanation": "The run() function orchestrates the main game loop and is called from __main__."
+        },
+        {
+          "id": 5,
+          "question": "Which parameter controls the blend between random jitter and directed chase behavior?",
+          "type": "multiple-choice",
+          "options": [
+            "JITTER_ACCELERATION",
+            "CHASE_WEIGHT",
+            "DETECTION_RADIUS",
+            "BASE_MAX_JITTER_SPEED"
+          ],
+          "correct": 1,
+          "explanation": "CHASE_WEIGHT (default 0.55) controls how much the movement blends jitter vs. chase toward larger squares."
+        }
+      ]
+    },
+    {
+      "id": "physics-simulation",
+      "title": "Physics & Movement",
+      "description": "Questions about physics simulation, collision detection, and movement mechanics",
+      "difficulty": "intermediate",
+      "timeLimit": 900,
+      "questions": [
+        {
+          "id": 1,
+          "question": "What does the BOUNCE_DAMPING coefficient (0.82) represent?",
+          "type": "multiple-choice",
+          "options": [
+            "Speed of bouncing",
+            "Energy loss on wall collision",
+            "Bounce height multiplier",
+            "Wall friction coefficient"
+          ],
+          "correct": 1,
+          "explanation": "BOUNCE_DAMPING (0.82) means squares retain 82% of velocity after wall collision, losing 18% as energy dissipation."
+        },
+        {
+          "id": 2,
+          "question": "What is the detection radius for finding chase targets?",
+          "type": "multiple-choice",
+          "options": ["100 pixels", "150 pixels", "220 pixels", "300 pixels"],
+          "correct": 2,
+          "explanation": "DETECTION_RADIUS is set to 220.0 pixels, limiting target acquisition range."
+        },
+        {
+          "id": 3,
+          "question": "How does square size affect maximum velocity in the simulation?",
+          "type": "multiple-choice",
+          "options": [
+            "Larger squares move faster",
+            "Smaller squares move faster",
+            "Size has no effect",
+            "It depends on color"
+          ],
+          "correct": 1,
+          "explanation": "Smaller squares move faster due to speed_scale = BASE_SQUARE_SIZE / size, creating size-based speed scaling."
+        },
+        {
+          "id": 4,
+          "question": "What happens when a square reaches the end of its lifespan?",
+          "type": "multiple-choice",
+          "options": [
+            "It disappears permanently",
+            "It turns gray",
+            "It rebirths with random attributes",
+            "It bounces harder"
+          ],
+          "correct": 2,
+          "explanation": "The rebirth_square() function resets a square to a new random state when age >= lifespan."
+        },
+        {
+          "id": 5,
+          "question": "What is the minimum size difference (MIN_SIZE_DELTA) required to chase a target?",
+          "type": "multiple-choice",
+          "options": ["3 pixels", "5 pixels", "6 pixels", "10 pixels"],
+          "correct": 2,
+          "explanation": "MIN_SIZE_DELTA is set to 6, preventing squares from chasing targets unless they're at least 6 pixels larger."
+        }
+      ]
+    },
+    {
+      "id": "architecture-design",
+      "title": "Architecture & Design",
+      "description": "Test your understanding of the project architecture and system design patterns",
+      "difficulty": "intermediate",
+      "timeLimit": 900,
+      "questions": [
+        {
+          "id": 1,
+          "question": "How many independent runtimes does the Lab 8 project have?",
+          "type": "multiple-choice",
+          "options": [
+            "1 (Pygame only)",
+            "2 (Pygame + Code Explorer)",
+            "3 (including CLI)",
+            "4 or more"
+          ],
+          "correct": 1,
+          "explanation": "The project has 2 independent runtimes: the Pygame simulation and the Code Explorer web utility."
+        },
+        {
+          "id": 2,
+          "question": "Which port does the Code Explorer server run on?",
+          "type": "multiple-choice",
+          "options": ["8000", "8001", "8080", "5000"],
+          "correct": 0,
+          "explanation": "The Code Explorer runs on localhost:8000 using ThreadingHTTPServer."
+        },
+        {
+          "id": 3,
+          "question": "What is the algorithmic complexity of the nearest-target search?",
+          "type": "multiple-choice",
+          "options": ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+          "correct": 3,
+          "explanation": "The _find_nearest_larger_target() function iterates through all squares, making it O(n²) per frame (n for each square)."
+        },
+        {
+          "id": 4,
+          "question": "Which data structure stores the main simulation state?",
+          "type": "multiple-choice",
+          "options": [
+            "A dictionary of squares",
+            "A list of MovingSquare objects",
+            "A set of coordinates",
+            "A 2D array grid"
+          ],
+          "correct": 1,
+          "explanation": "Simulation state is stored as a List[MovingSquare], which is updated in-place each frame."
+        },
+        {
+          "id": 5,
+          "question": "What is the resolution of the Pygame window?",
+          "type": "multiple-choice",
+          "options": ["640x480", "800x600", "1024x768", "1280x720"],
+          "correct": 1,
+          "explanation": "WINDOW_WIDTH and WINDOW_HEIGHT are set to 800 and 600 respectively."
+        }
+      ]
+    },
+    {
+      "id": "code-structure",
+      "title": "Code Organization",
+      "description": "Questions about the codebase structure, functions, and best practices",
+      "difficulty": "beginner",
+      "timeLimit": 600,
+      "questions": [
+        {
+          "id": 1,
+          "question": "What does the _make_square() function do?",
+          "type": "multiple-choice",
+          "options": [
+            "Deletes a square from the list",
+            "Creates one square with random attributes",
+            "Draws a square on screen",
+            "Checks if a square exists"
+          ],
+          "correct": 1,
+          "explanation": "_make_square() creates a single MovingSquare with randomized position, velocity, size, color, and lifespan."
+        },
+        {
+          "id": 2,
+          "question": "Which function computes the center point of a square?",
+          "type": "multiple-choice",
+          "options": [
+            "get_center()",
+            "_center()",
+            "center()",
+            "compute_center()"
+          ],
+          "correct": 1,
+          "explanation": "The _center() function returns (x + size/2, y + size/2), computing the square's center coordinates."
+        },
+        {
+          "id": 3,
+          "question": "What does handle_events() return?",
+          "type": "multiple-choice",
+          "options": [
+            "A list of events",
+            "The quit status (True = keep running, False = quit)",
+            "The number of events processed",
+            "An event object"
+          ],
+          "correct": 1,
+          "explanation": "handle_events() returns False when pygame.QUIT is triggered, signaling the game loop to exit."
+        },
+        {
+          "id": 4,
+          "question": "Type annotations in the project use which feature?",
+          "type": "multiple-choice",
+          "options": [
+            "Python 3.9 native annotations",
+            "The typing module only",
+            "from __future__ import annotations",
+            "No type annotations"
+          ],
+          "correct": 2,
+          "explanation": "The project uses 'from __future__ import annotations' for forward-compatible type hints."
+        },
+        {
+          "id": 5,
+          "question": "What method scales velocity based on square size?",
+          "type": "multiple-choice",
+          "options": [
+            "_random_velocity()",
+            "_scale_velocity()",
+            "speed_scale variable calculation",
+            "adjust_speed()"
+          ],
+          "correct": 2,
+          "explanation": "Speed scaling uses speed_scale = BASE_SQUARE_SIZE / size, making smaller squares faster."
+        }
+      ]
+    },
+    {
+      "id": "web-explorer",
+      "title": "Code Explorer Utility",
+      "description": "Questions about the web-based Code Explorer tool",
+      "difficulty": "beginner",
+      "timeLimit": 600,
+      "questions": [
+        {
+          "id": 1,
+          "question": "What port does the Code Explorer server listen on?",
+          "type": "multiple-choice",
+          "options": ["8000", "8001", "3000", "5000"],
+          "correct": 0,
+          "explanation": "The Code Explorer runs on 127.0.0.1:8000 and can be accessed at http://127.0.0.1:8000"
+        },
+        {
+          "id": 2,
+          "question": "Which API endpoint returns the repository file tree?",
+          "type": "multiple-choice",
+          "options": ["/api/files", "/api/tree", "/api/list", "/api/explore"],
+          "correct": 1,
+          "explanation": "GET /api/tree returns all files, metadata, and repository summary."
+        },
+        {
+          "id": 3,
+          "question": "How do you retrieve the content of a specific file?",
+          "type": "multiple-choice",
+          "options": [
+            "GET /api/read?file=...",
+            "GET /api/file?path=...",
+            "POST /api/content",
+            "GET /file/..."
+          ],
+          "correct": 1,
+          "explanation": "GET /api/file?path=<relative_path> returns the file content with language detection."
+        },
+        {
+          "id": 4,
+          "question": "Which directories are excluded from the Code Explorer file listings?",
+          "type": "multiple-choice",
+          "options": [
+            "Only .git",
+            ".git, .venv, __pycache__, .DS_Store",
+            "Everything in .gitignore",
+            "No directories are excluded"
+          ],
+          "correct": 1,
+          "explanation": "ignored_names = {'.git', '.venv', '__pycache__', '.DS_Store'} are filtered out for a cleaner view."
+        },
+        {
+          "id": 5,
+          "question": "What type of files does Code Explorer refuse to serve?",
+          "type": "multiple-choice",
+          "options": [
+            "Python files",
+            "Markdown files",
+            "Binary files",
+            "Large files over 1MB"
+          ],
+          "correct": 2,
+          "explanation": "Binary files are rejected; only text files matching TEXT_EXTENSIONS or named README/LICENSE are served."
+        }
+      ]
+    },
+    {
+      "id": "pygame-advanced",
+      "title": "Advanced Pygame Concepts",
+      "description": "Deep dive into Pygame mechanics and the simulation system",
+      "difficulty": "advanced",
+      "timeLimit": 1200,
+      "questions": [
+        {
+          "id": 1,
+          "question": "How is square opacity calculated in the rendering function?",
+          "type": "multiple-choice",
+          "options": [
+            "Constant 255 (fully opaque)",
+            "Based on velocity magnitude",
+            "Fades from 255 to 80 over lifespan",
+            "Random per frame"
+          ],
+          "correct": 2,
+          "explanation": "alpha = int(255 - ratio * 175) where ratio = age/lifespan, creating a visual fade effect as squares age."
+        },
+        {
+          "id": 2,
+          "question": "What is dt_seconds in the update loop?",
+          "type": "multiple-choice",
+          "options": [
+            "Display time (frames shown)",
+            "Delta time: milliseconds since last frame / 1000",
+            "Default time for physics",
+            "Data transmission seconds"
+          ],
+          "correct": 1,
+          "explanation": "dt_seconds = clock.tick(FPS) / 1000.0 converts milliseconds to seconds for frame-rate-independent physics."
+        },
+        {
+          "id": 3,
+          "question": "What is the purpose of IDLE_WAIT_MS in the main loop?",
+          "type": "multiple-choice",
+          "options": [
+            "Wait before processing input",
+            "Limit CPU usage when no events pending",
+            "Frame rate synchronization",
+            "Network timeout interval"
+          ],
+          "correct": 1,
+          "explanation": "IDLE_WAIT_MS (1 ms) pauses when no events are pending, reducing CPU usage during idle periods."
+        },
+        {
+          "id": 4,
+          "question": "How does the chase logic calculate direction to target?",
+          "type": "multiple-choice",
+          "options": [
+            "dx, dy = random vectors",
+            "dx, dy = tx - sx, ty - sy; normalized",
+            "Straight line without physics",
+            "Grid-based pathfinding"
+          ],
+          "correct": 1,
+          "explanation": "Direction is computed as (dx, dy) = (target_x - chaser_x, target_y - chaser_y), then normalized for unit direction."
+        },
+        {
+          "id": 5,
+          "question": "What does the velocity clamping do in update_squares()?",
+          "type": "multiple-choice",
+          "options": [
+            "Prevents velocity from becoming negative",
+            "Caps velocity magnitude based on square size",
+            "Resets velocity to zero each frame",
+            "Increases velocity over time"
+          ],
+          "correct": 1,
+          "explanation": "Velocity is clamped to [-max_speed, max_speed] where max_speed = BASE_MAX_JITTER_SPEED * speed_scale."
+        }
+      ]
+    }
+  ]
+}

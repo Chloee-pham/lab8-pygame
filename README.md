@@ -35,6 +35,12 @@ pip install -r requirements.txt
 python main.py
 ```
 
+From the workspace root, you can also run:
+
+```bash
+python3 main.py
+```
+
 ## Code Explorer
 
 Launch the lightweight browser-based code explorer for this project:
@@ -48,6 +54,31 @@ Then open:
 ```text
 http://127.0.0.1:8000
 ```
+
+## Flash Quiz
+
+Test your knowledge of the Pygame project with an interactive learning tool:
+
+```bash
+python quiz/serve.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8001
+```
+
+The quiz includes 6 modules covering:
+
+- Pygame Fundamentals
+- Physics & Movement
+- Architecture & Design
+- Code Organization
+- Code Explorer Utility
+- Advanced Pygame Concepts
+
+See [quiz/README.md](quiz/README.md) for detailed information.
 
 ## Notes
 

@@ -1,79 +1,290 @@
-# macOS
-.DS_Store
+from __future__ import annotations
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+from dataclasses import dataclass, field
+import math
+import random
+from typing import List
 
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
+import pygame
 
-# Python tooling caches
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-.pyre/
-.hypothesis/
-.tox/
-.nox/
-.coverage
-.coverage.*
-htmlcov/
-pip-wheel-metadata/
 
-# Jupyter
-.ipynb_checkpoints/
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+MIN_SQUARE_SIZE = 15
+MAX_SQUARE_SIZE = 60
+BASE_SQUARE_SIZE = 30
+SQUARE_COUNT = 24
+BACKGROUND_COLOR = (20, 20, 20)
+FPS = 60
+IDLE_WAIT_MS = 1
+JITTER_ACCELERATION = 220.0
+BASE_MAX_JITTER_SPEED = 180.0
+BOUNCE_DAMPING = 0.82
+MIN_LIFESPAN = 3.0   # seconds
+MAX_LIFESPAN = 10.0  # seconds
 
-# Environment and secrets
-.env
-.env.*
-!.env.example
+# --- Predator / prey tuning ---
+# Fraction of acceleration that is directed chase vs. pure jitter (0.0 = full wander, 1.0 = full chase).
+CHASE_WEIGHT = 0.55
+# A square must be at least this many pixels larger to act as predator.
+MIN_SIZE_DELTA = 6
+# Detection radius (pixels) within which a predator notices prey.
+DETECTION_RADIUS = 220.0
+# Prey flee-force multiplier (relative to the predator chase multiplier).
+FLEE_WEIGHT = 0.35
 
-# Web / Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
-# Frontend build outputs
-.next/
-.nuxt/
-.svelte-kit/
-.parcel-cache/
-.vite/
-coverage/
-*.tsbuildinfo
+@dataclass
+class MovingSquare:
+    """One square with position, velocity, and life span."""
 
-# IDE / editors
-.vscode/
-.idea/
-*.swp
-*.swo
+    x: float
+    y: float
+    vx: float
+    vy: float
+    size: int
+    color: tuple[int, int, int]
+    lifespan: float        # total time to live, in seconds
+    age: float = field(default=0.0)   # time lived so far, in seconds
 
-# Misc
-tmp/
-temp/
 
+def _random_velocity(size: int) -> tuple[float, float]:
+    """Return a random (vx, vy) scaled by square size."""
+    base_min_speed = -120
+    base_max_speed = 120
+    base_min_abs = 20
+    speed_scale = BASE_SQUARE_SIZE / size
+    lo = base_min_speed * speed_scale
+    hi = base_max_speed * speed_scale
+    min_abs = base_min_abs * speed_scale
+    vx = random.uniform(lo, hi)
+    vy = random.uniform(lo, hi)
+    while abs(vx) < min_abs and abs(vy) < min_abs:
+        vx = random.uniform(lo, hi)
+        vy = random.uniform(lo, hi)
+    return vx, vy
+
+
+def _random_color() -> tuple[int, int, int]:
+    return (
+        random.randint(60, 255),
+        random.randint(60, 255),
+        random.randint(60, 255),
+    )
+
+
+def init_pygame() -> tuple[pygame.Surface, pygame.time.Clock]:
+    """Create the window and clock."""
+    pygame.init()
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("Lab 8 - Moving Squares (Predator / Prey)")
+    clock = pygame.time.Clock()
+    return screen, clock
+
+
+def _make_square() -> MovingSquare:
+    """Create one square with random attributes."""
+    size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+    x = random.uniform(0, WINDOW_WIDTH - size)
+    y = random.uniform(0, WINDOW_HEIGHT - size)
+    vx, vy = _random_velocity(size)
+    return MovingSquare(
+        x=x,
+        y=y,
+        vx=vx,
+        vy=vy,
+        size=size,
+        color=_random_color(),
+        lifespan=random.uniform(MIN_LIFESPAN, MAX_LIFESPAN),
+        age=0.0,
+    )
+
+
+def create_initial_squares(count: int) -> List[MovingSquare]:
+    """Return `count` squares with random start positions and velocities."""
+    return [_make_square() for _ in range(count)]
+
+
+def rebirth_square(square: MovingSquare) -> None:
+    """Reset a square to a brand-new random state (in-place)."""
+    size = random.randint(MIN_SQUARE_SIZE, MAX_SQUARE_SIZE)
+    square.size = size
+    square.x = random.uniform(0, WINDOW_WIDTH - size)
+    square.y = random.uniform(0, WINDOW_HEIGHT - size)
+    square.vx, square.vy = _random_velocity(size)
+    square.color = _random_color()
+    square.lifespan = random.uniform(MIN_LIFESPAN, MAX_LIFESPAN)
+    square.age = 0.0
+
+
+def handle_events() -> bool:
+    """Process events. Return False when app should quit."""
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return False
+    return True
+
+
+def _center(square: MovingSquare) -> tuple[float, float]:
+    return square.x + square.size / 2, square.y + square.size / 2
+
+
+def _find_nearest_prey(
+    predator: MovingSquare,
+    squares: List[MovingSquare],
+) -> MovingSquare | None:
+    """Return the closest square that is meaningfully smaller, within detection radius."""
+    px, py = _center(predator)
+    best: MovingSquare | None = None
+    best_dist = DETECTION_RADIUS
+
+    for candidate in squares:
+        if candidate is predator:
+            continue
+        if predator.size - candidate.size < MIN_SIZE_DELTA:
+            continue
+        cx, cy = _center(candidate)
+        dist = math.hypot(cx - px, cy - py)
+        if dist < best_dist:
+            best_dist = dist
+            best = candidate
+    return best
+
+
+def _find_nearest_predator(
+    prey: MovingSquare,
+    squares: List[MovingSquare],
+) -> MovingSquare | None:
+    """Return the closest square that is meaningfully larger, within detection radius."""
+    px, py = _center(prey)
+    best: MovingSquare | None = None
+    best_dist = DETECTION_RADIUS
+
+    for candidate in squares:
+        if candidate is prey:
+            continue
+        if candidate.size - prey.size < MIN_SIZE_DELTA:
+            continue
+        cx, cy = _center(candidate)
+        dist = math.hypot(cx - px, cy - py)
+        if dist < best_dist:
+            best_dist = dist
+            best = candidate
+    return best
+
+
+def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
+    """Update all squares for one frame, including life span / rebirth."""
+    for square in squares:
+        # --- Life Span / Rebirth ---
+        square.age += dt_seconds
+        if square.age >= square.lifespan:
+            rebirth_square(square)
+            continue  # skip movement update for the reborn square this frame
+
+        # --- Base jitter ---
+        speed_scale = BASE_SQUARE_SIZE / square.size
+        max_speed = BASE_MAX_JITTER_SPEED * speed_scale
+
+        jitter_ax = random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION)
+        jitter_ay = random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION)
+
+        # --- Chase / flee directed acceleration ---
+        directed_ax = 0.0
+        directed_ay = 0.0
+
+        prey = _find_nearest_prey(square, squares)
+        if prey is not None:
+            # Predator: steer toward prey center.
+            sx, sy = _center(square)
+            tx, ty = _center(prey)
+            dx, dy = tx - sx, ty - sy
+            dist = math.hypot(dx, dy) or 1.0
+            # Scale force so it's stronger up close (inverse falloff, clamped).
+            strength = JITTER_ACCELERATION * min(DETECTION_RADIUS / dist, 3.0)
+            directed_ax = (dx / dist) * strength
+            directed_ay = (dy / dist) * strength
+        else:
+            # Maybe this square is prey — check for an incoming predator.
+            predator = _find_nearest_predator(square, squares)
+            if predator is not None:
+                # Flee: steer away from predator center.
+                sx, sy = _center(square)
+                px, py = _center(predator)
+                dx, dy = sx - px, sy - py
+                dist = math.hypot(dx, dy) or 1.0
+                strength = JITTER_ACCELERATION * FLEE_WEIGHT * min(DETECTION_RADIUS / dist, 3.0)
+                directed_ax = (dx / dist) * strength
+                directed_ay = (dy / dist) * strength
+
+        # Blend jitter and directed acceleration.
+        ax = jitter_ax * (1.0 - CHASE_WEIGHT) + directed_ax * CHASE_WEIGHT
+        ay = jitter_ay * (1.0 - CHASE_WEIGHT) + directed_ay * CHASE_WEIGHT
+
+        square.vx += ax * dt_seconds
+        square.vy += ay * dt_seconds
+
+        square.vx = max(-max_speed, min(max_speed, square.vx))
+        square.vy = max(-max_speed, min(max_speed, square.vy))
+
+        square.x += square.vx * dt_seconds
+        square.y += square.vy * dt_seconds
+
+        # --- Bounce off walls ---
+        if square.x < 0:
+            square.x = 0
+            square.vx = abs(square.vx) * BOUNCE_DAMPING
+        elif square.x + square.size > WINDOW_WIDTH:
+            square.x = WINDOW_WIDTH - square.size
+            square.vx = -abs(square.vx) * BOUNCE_DAMPING
+
+        if square.y < 0:
+            square.y = 0
+            square.vy = abs(square.vy) * BOUNCE_DAMPING
+        elif square.y + square.size > WINDOW_HEIGHT:
+            square.y = WINDOW_HEIGHT - square.size
+            square.vy = -abs(square.vy) * BOUNCE_DAMPING
+
+
+def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
+    """Render one frame.
+
+    Each square fades slightly as it ages — alpha goes from 255 → 80
+    over its lifespan, giving a visual cue that rebirth is approaching.
+    """
+    screen.fill(BACKGROUND_COLOR)
+
+    for square in squares:
+        # Compute fade: fully opaque when young, dimmer when old.
+        ratio = min(square.age / square.lifespan, 1.0)
+        alpha = int(255 - ratio * 175)   # 255 → 80
+
+        surf = pygame.Surface((square.size, square.size), pygame.SRCALPHA)
+        r, g, b = square.color
+        surf.fill((r, g, b, alpha))
+        screen.blit(surf, (int(square.x), int(square.y)))
+
+    pygame.display.flip()
+
+
+def run() -> None:
+    """Application entry point."""
+    screen, clock = init_pygame()
+    squares = create_initial_squares(SQUARE_COUNT)
+
+    running = True
+    while running:
+        dt_seconds = clock.tick(FPS) / 1000.0
+
+        if not pygame.event.peek():
+            pygame.time.wait(IDLE_WAIT_MS)
+
+        running = handle_events()
+        update_squares(squares, dt_seconds)
+        draw_scene(screen, squares)
+
+    pygame.quit()
+
+
+if __name__ == "__main__":
+    run()

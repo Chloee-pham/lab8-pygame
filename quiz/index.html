@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flash Quiz - Lab 8 Pygame</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1>🎮 Flash Quiz</h1>
+          <p class="subtitle">Lab 8 Pygame Project Learning Tool</p>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Quiz Selection View -->
+        <div id="quizSelectionView" class="view active">
+          <div class="intro-section">
+            <h2>Welcome to Flash Quiz</h2>
+            <p>
+              Test your knowledge of the Lab 8 Pygame simulation project,
+              architecture, physics mechanics, and web utilities.
+            </p>
+            <p class="info-text">
+              Select a quiz to begin. Each quiz tests different aspects of the
+              project.
+            </p>
+          </div>
+
+          <div id="quizList" class="quiz-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Quiz Taking View -->
+        <div id="quizTakingView" class="view">
+          <div class="quiz-header">
+            <button id="backButton" class="btn-secondary">← Back</button>
+            <h2 id="quizTitle">Quiz Title</h2>
+            <div class="quiz-meta">
+              <span id="questionProgress">Question 1/5</span>
+              <span id="timer">Time: --:--</span>
+            </div>
+          </div>
+
+          <div class="quiz-body">
+            <div id="questionContainer" class="question-container">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <div class="quiz-footer">
+            <button id="prevButton" class="btn-secondary" disabled>
+              ← Previous
+            </button>
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <button id="nextButton" class="btn-primary">Next →</button>
+          </div>
+        </div>
+
+        <!-- Results View -->
+        <div id="resultsView" class="view">
+          <div class="results-container">
+            <div class="results-summary">
+              <h2>Quiz Completed!</h2>
+              <div class="score-display">
+                <span id="scoreValue" class="score-value">0</span>
+                <span class="score-label">out of</span>
+                <span id="totalValue" class="score-value">0</span>
+              </div>
+              <div class="percentage-display">
+                <div class="percentage-circle">
+                  <span id="percentageValue">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="results-details">
+              <h3>Performance</h3>
+              <div class="results-grid">
+                <div class="result-item">
+                  <span class="result-label">Questions Correct</span>
+                  <span id="correctCount" class="result-value">0</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Questions Incorrect</span>
+                  <span id="incorrectCount" class="result-value">0</span>
+                </div>
+                <div class="result-item">
+                  <span class="result-label">Time Taken</span>
+                  <span id="timeTaken" class="result-value">0:00</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="reviewSection" class="review-section">
+              <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="results-actions">
+              <button id="retakeButton" class="btn-primary">Retake Quiz</button>
+              <button id="homeButton" class="btn-secondary">
+                ← Back to Quizzes
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Lab 8 Pygame - Flash Quiz Learning Tool</p>
+        <p class="footer-hint">
+          Learn more: <a href="http://127.0.0.1:8000">Code Explorer</a> |
+          <a href="#" target="_blank">Architecture Doc</a>
+        </p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

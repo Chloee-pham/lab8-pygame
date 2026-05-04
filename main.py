@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 import random
 from typing import List
 
@@ -21,6 +22,11 @@ BASE_MAX_JITTER_SPEED = 180.0
 BOUNCE_DAMPING = 0.82
 MIN_LIFESPAN = 3.0   # seconds
 MAX_LIFESPAN = 10.0  # seconds
+
+# --- Predator / prey tuning ---
+CHASE_WEIGHT = 0.55
+MIN_SIZE_DELTA = 6
+DETECTION_RADIUS = 220.0
 
 
 @dataclass
@@ -66,7 +72,7 @@ def init_pygame() -> tuple[pygame.Surface, pygame.time.Clock]:
     """Create the window and clock."""
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Lab 8 - Moving Squares (Life Span / Rebirth)")
+    pygame.display.set_caption("Lab 8 - Moving Squares (Small Chases Big)")
     clock = pygame.time.Clock()
     return screen, clock
 
@@ -114,6 +120,32 @@ def handle_events() -> bool:
     return True
 
 
+def _center(square: MovingSquare) -> tuple[float, float]:
+    return square.x + square.size / 2, square.y + square.size / 2
+
+
+def _find_nearest_larger_target(
+    chaser: MovingSquare,
+    squares: List[MovingSquare],
+) -> MovingSquare | None:
+    """Return the closest square that is meaningfully larger, within detection radius."""
+    px, py = _center(chaser)
+    best: MovingSquare | None = None
+    best_dist = DETECTION_RADIUS
+
+    for candidate in squares:
+        if candidate is chaser:
+            continue
+        if candidate.size - chaser.size < MIN_SIZE_DELTA:
+            continue
+        cx, cy = _center(candidate)
+        dist = math.hypot(cx - px, cy - py)
+        if dist < best_dist:
+            best_dist = dist
+            best = candidate
+    return best
+
+
 def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
     """Update all squares for one frame, including life span / rebirth."""
     for square in squares:
@@ -123,12 +155,35 @@ def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
             rebirth_square(square)
             continue  # skip movement update for the reborn square this frame
 
-        # --- Jitter movement ---
+        # --- Base jitter ---
         speed_scale = BASE_SQUARE_SIZE / square.size
         max_speed = BASE_MAX_JITTER_SPEED * speed_scale
 
-        square.vx += random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION) * dt_seconds
-        square.vy += random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION) * dt_seconds
+        jitter_ax = random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION)
+        jitter_ay = random.uniform(-JITTER_ACCELERATION, JITTER_ACCELERATION)
+
+        # --- Chase / flee directed acceleration ---
+        directed_ax = 0.0
+        directed_ay = 0.0
+
+        target = _find_nearest_larger_target(square, squares)
+        if target is not None:
+            # Smaller square: steer toward a larger target.
+            sx, sy = _center(square)
+            tx, ty = _center(target)
+            dx, dy = tx - sx, ty - sy
+            dist = math.hypot(dx, dy) or 1.0
+            # Scale force so it's stronger up close (inverse falloff, clamped).
+            strength = JITTER_ACCELERATION * min(DETECTION_RADIUS / dist, 3.0)
+            directed_ax = (dx / dist) * strength
+            directed_ay = (dy / dist) * strength
+
+        # Blend jitter and directed acceleration.
+        ax = jitter_ax * (1.0 - CHASE_WEIGHT) + directed_ax * CHASE_WEIGHT
+        ay = jitter_ay * (1.0 - CHASE_WEIGHT) + directed_ay * CHASE_WEIGHT
+
+        square.vx += ax * dt_seconds
+        square.vy += ay * dt_seconds
 
         square.vx = max(-max_speed, min(max_speed, square.vx))
         square.vy = max(-max_speed, min(max_speed, square.vy))
