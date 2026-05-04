@@ -96,8 +96,15 @@ def _make_square() -> MovingSquare:
 
 
 def create_initial_squares(count: int) -> List[MovingSquare]:
-    """Return `count` squares with random start positions and velocities."""
-    return [_make_square() for _ in range(count)]
+    squares = []
+    for _ in range(5):
+        squares.append(_make_square(size=25))
+    for _ in range(10):
+        squares.append(_make_square(size=10))
+    for _ in range(30):
+        squares.append(_make_square(size=4))
+    return squares
+
 
 
 def rebirth_square(square: MovingSquare) -> None:
@@ -218,7 +225,7 @@ def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
     for square in squares:
         # Compute fade: fully opaque when young, dimmer when old.
         ratio = min(square.age / square.lifespan, 1.0)
-        alpha = int(255 - ratio * 175)   # 255 → 80
+        alpha = int(255 - ratio * 175)   
 
         surf = pygame.Surface((square.size, square.size), pygame.SRCALPHA)
         r, g, b = square.color
@@ -231,7 +238,7 @@ def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
 def run() -> None:
     """Application entry point."""
     screen, clock = init_pygame()
-    squares = create_initial_squares(SQUARE_COUNT)
+    squares = create_initial_squares()
 
     running = True
     while running:
