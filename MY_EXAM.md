@@ -30,4 +30,4 @@ Every 500ms (GROWTH_INTERVAL_MS), the square grows by GROWTH_SPEED (1 pixel) unt
 pending_growth reaches 0. Velocity is clamped after each growth tick to keep
 speed consistent with the new size.
 
-I DONT HAVE ENOUGH TIME T-T
+I DON'T HAVE ENOUGH TIME T-&
