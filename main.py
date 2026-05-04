@@ -142,8 +142,19 @@ def handle_eating(squares: List[MovingSquare]) -> None:
         if check_collision(a, b):
             if a.size > b.size:
                 rebirth_square(b)
+                a.size = min(a.size + b.size // 5, MAX_SQUARE_SIZE)
+                speed_scale = BASE_SQUARE_SIZE / a.size
+                max_speed = BASE_MAX_JITTER_SPEED * speed_scale
+                a.vx = max(-max_speed, min(max_speed, a.vx))
+                a.vy = max(-max_speed, min(max_speed, a.vy))
             elif b.size > a.size:
                 rebirth_square(a)
+                b.size = min(b.size + a.size // 5, MAX_SQUARE_SIZE)
+                speed_scale = BASE_SQUARE_SIZE / b.size
+                max_speed = BASE_MAX_JITTER_SPEED * speed_scale
+                b.vx = max(-max_speed, min(max_speed, b.vx))
+                b.vy = max(-max_speed, min(max_speed, b.vy))
+
 
 
 def _find_nearest_larger_target(
