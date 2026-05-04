@@ -196,20 +196,17 @@ def update_squares(squares: List[MovingSquare], dt_seconds: float) -> None:
         square.x += square.vx * dt_seconds
         square.y += square.vy * dt_seconds
 
-        # --- Bounce off walls ---
-        if square.x < 0:
-            square.x = 0
-            square.vx = abs(square.vx) * BOUNCE_DAMPING
-        elif square.x + square.size > WINDOW_WIDTH:
-            square.x = WINDOW_WIDTH - square.size
-            square.vx = -abs(square.vx) * BOUNCE_DAMPING
+        # --- Wrap around walls ---
+        if square.x + square.size < 0:
+             square.x = WINDOW_WIDTH
+        elif square.x > WINDOW_WIDTH:
+             square.x = -square.size
 
-        if square.y < 0:
-            square.y = 0
-            square.vy = abs(square.vy) * BOUNCE_DAMPING
-        elif square.y + square.size > WINDOW_HEIGHT:
-            square.y = WINDOW_HEIGHT - square.size
-            square.vy = -abs(square.vy) * BOUNCE_DAMPING
+        if square.y + square.size < 0:
+             square.y = WINDOW_HEIGHT
+        elif square.y > WINDOW_HEIGHT:
+             square.y = -square.size
+
 
 
 def draw_scene(screen: pygame.Surface, squares: List[MovingSquare]) -> None:
