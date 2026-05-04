@@ -6,6 +6,8 @@ import random
 from typing import List
 
 import pygame
+import itertools
+
 
 
 WINDOW_WIDTH = 800
@@ -135,6 +137,15 @@ def check_collision(a: MovingSquare, b: MovingSquare) -> bool:
     return rect_a.colliderect(rect_b)
 
 
+def handle_eating(squares: List[MovingSquare]) -> None:
+    for a, b in itertools.combinations(squares, 2):
+        if check_collision(a, b):
+            if a.size > b.size:
+                rebirth_square(b)
+            elif b.size > a.size:
+                rebirth_square(a)
+
+
 def _find_nearest_larger_target(
     chaser: MovingSquare,
     squares: List[MovingSquare],
@@ -250,6 +261,7 @@ def run() -> None:
 
         running = handle_events()
         update_squares(squares, dt_seconds)
+        handle_eating(squares)
         draw_scene(screen, squares)
 
     pygame.quit()
